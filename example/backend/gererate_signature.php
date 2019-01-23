@@ -16,6 +16,7 @@
     "requestTimeStr" => $_POST['requestTimeStr'] // It's time to order. NOTE: Use the merchant's time zone.
   );
 
+  // Add only when value is not null
   if ($_POST['customParams'] != NULL) {
     $params['customParams'] = $_POST['customParams'];
   }
