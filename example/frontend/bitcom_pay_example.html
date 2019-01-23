@@ -1,0 +1,164 @@
+<html>
+<head>
+  <title>Generate QR code Demo</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+
+  <script type="text/javascript" src="./vendor/jquery/jquery.min.js"></script>
+  <link rel="stylesheet" href="./vendor/bootstrap/css/bootstrap.css"/>
+  <link rel="stylesheet" href="./dist/css/bootstrapValidator.css"/>
+
+</head>
+<body>
+  <div class="container">
+    <div class="row" style="padding-top: 50px; width:100%; text-align: center;">
+     <b style="font-size: 30px;">Generate QR code Demo</b>
+    </div>
+  </div>
+<div class="container">
+  <div class="row" style="padding-top: 100px">
+    <div class="col-md-8" style="border-right: 1px solid #cccccc;">
+      <div class="form-horizontal bv-form">
+
+        <div class="form-group">
+          <label class="col-lg-3 control-label">Coin Id</label>
+          <div class="col-lg-8">
+            <select type="text" class="form-control" name="coinId" id="coinId" placeholder="Please enter the product name" />
+              <option>Choose the coin merchant want to receive</option>
+              <option value="6">BCH</option>
+              <option value="2">BS</option>
+              <option value="5">BTC</option>
+              <option value="3">ETH</option>
+              <option value="4">USDT</option>
+              <option value="7">XRP</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-lg-3 control-label">Currency Type</label>
+          <div class="col-lg-8">
+            <select type="text" class="form-control" name="currencyType" id="currencyType" placeholder="Please enter the product name" />
+              <option>Choose the currency on which the item price is based</option>
+              <option value="1">CNY</option>
+              <option value="3">KRW</option>
+              <option value="2">USD</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-lg-3 control-label">Item Name</label>
+          <div class="col-lg-8">
+            <input type="text" class="form-control" name="itemName" id="itemName" placeholder="Please enter the product name" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-lg-3 control-label">Item Price</label>
+          <div class="col-lg-8">
+            <input type="text" class="form-control" name="price" id="price" placeholder="Please enter the price of the product" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " onafterpaste="this.value=this.value.replace(/[^\d]/g,'') ">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-lg-3 control-label">Order Number</label>
+          <div class="col-lg-8">
+            <input type="text" class="form-control" name="orderNum" maxlength="15" id="orderNum"  placeholder="Please enter the order number (the length must be 15 digits)" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " onafterpaste="this.value=this.value.replace(/[^\d]/g,'') ">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-lg-3 control-label">Remarks</label>
+          <div class="col-lg-8">
+            <textarea class="form-control" rows="4" id="remarks" name="remarks" placeholder="Remarks; optional (limited to 1024 characters, must be in json format, for example: {'test': 'aa'})"></textarea>
+          </div>
+        </div>
+
+
+
+        <div class="form-group">
+          <div class="col-lg-9 col-lg-offset-3">
+            <button type="submit" onclick="submit();" class="btn btn-primary">Sign up</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-lg-9 col-lg-offset-3">
+            <hr>
+            <p></p>
+            <a href="http://demo.bitcom.com/php1.0.zip">BitcomPay php Code DownLoad</a>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-lg-9 col-lg-offset-3">
+            <hr>
+            <p></p>
+            <a href="https://pay.bitcom.com/">BitcomPay Homepage</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="col-md-4">
+      <img src="./img/index_code.jpg" id="imgSrc" style="width: 220px;border: 1px solid #dcdcdc;"/>
+    </div>
+    <div class="col-md-4" style="text-align: center; padding-top: 30px;">
+
+
+      <textarea class="form-control" rows="4" id="demo_code" name="demo_code" readonly="readonly" style="width: 220px; height: 240px;"></textarea>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+<script type="text/javascript">
+
+  async function submit(params, signature) {
+
+    try {
+      var params = {
+        "appKey": "input-your-access-key", // ACCESS KEY
+        "coinId": $('#coinId').val(), // 2(BS), 3(ETH), 4(USDT), 5(BTC), 6(BCH), 7(XRP) // Choose the coin merchant want to receive.
+        "currencyType": $('#currencyType').val(), // 1(CNY), 2(USD), 3(KRW) // The type of legal currency for the item price.
+        "customParams": $('#remarks').val(),
+        "itemName": $('#itemName').val(), // ITEM NAME
+        "orderNum": $('#orderNum').val(), // This is a 15-digit order number that allows the merchant to distinguish an order.
+        "price": $('#price').val(), // Item price based on specified legal currency.
+        "requestTimeStr": "2019-01-01 00:00:00" // It's time to order. NOTE: Use the merchant's time zone.
+      }
+
+      params.sign = await $.ajax({
+        "cache": true,
+        "type": "POST",
+        "url": "http://your-backend-domain/creat-qr-code-url",
+        "data": params
+      });
+
+      $.ajax({
+        cache: true,
+        type: "POST",
+        url:  "https://payapi.bitcom.com/api/bus/qrcode/create",
+        data: params,
+        error: function (jqXHR, exception) {
+          console.error(jqXHR, exception);
+        },
+        success: function(response) {
+          var res = response;
+          
+          if (res.code === 200) {
+            $("#imgSrc").attr('src',"data:image/jpeg;base64,"+res.qrcodeData)
+            document.getElementById("demo_code").innerHTML = JSON.stringify(res);
+          } else {
+            alert(res.msg);
+          }
+        }
+      });
+    } catch (exception) {
+      console.error(exception);
+    }
+  }
+</script>
+</html>
